@@ -2,6 +2,7 @@ package com.mmall.service.impl;
 
 import com.mmall.common.Const;
 import com.mmall.common.ServerResponse;
+import com.mmall.common.TokenCache;
 import com.mmall.dao.UserMapper;
 import com.mmall.pojo.User;
 import com.mmall.service.IUserService;
@@ -9,6 +10,8 @@ import com.mmall.util.MD5Util;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service("iUserService")
 public class UserServiceImpl implements IUserService {
@@ -99,6 +102,83 @@ public class UserServiceImpl implements IUserService {
         return ServerResponse.createByErrorMessage("找回密码的问题是空的");
     }
 
+    public ServerResponse<String> checkAnswer(String username,String question,String answer){
+        int resultCount = userMapper.checkAnswer(username, question, answer);
+        if (resultCount > 0){
+            //能查到 说明答案是正确的 创建token 放入到缓存中
+            String forgetToken = UUID.randomUUID().toString();
+            TokenCache.setKey("token_"+username,forgetToken);
+            return ServerResponse.createBySuccess(forgetToken);
+        }
+        return ServerResponse.createByErrorMessage("问题的答案错误");
+    }
 
+    public ServerResponse<String> forgetResetPassword(String username, String passwordNew, String forgetToken){
+        //校验token是否正确
+        if (StringUtils.isBlank(forgetToken)){
+            return ServerResponse.createByErrorMessage("参数错误,token需要传递");
+        }
+
+        //校验用户是否存在
+        ServerResponse<String> validResponse = this.checkValid(username, Const.USERNAME);
+        if (validResponse.isSuccess()){
+            return ServerResponse.createByErrorMessage("用户不存在");
+        }
+
+        String token = TokenCache.getKey(TokenCache.TOKEN_PREFIX + username);
+        if (StringUtils.isBlank(token)){
+            return ServerResponse.createByErrorMessage("token无效或者过期");
+        }
+
+        //比较两个token的值
+        if (StringUtils.equals(forgetToken,token)){
+            String md5Password = MD5Util.MD5EncodeUtf8(passwordNew);
+            int rowCount = userMapper.updatePasswordByUsername(username,md5Password);
+
+            if (rowCount > 0){
+                return ServerResponse.createBySuccessMessage("修改密码成功");
+            }
+        }else {
+            return ServerResponse.createByErrorMessage("token错误,请重新获取重置密码的token");
+        }
+        return ServerResponse.createByErrorMessage("修改密码失败");
+    }
+
+    public ServerResponse<String> resetPassword(String passwordOld,String passwordNew,User user){
+        //防止横向越权
+        int resultCount = userMapper.checkPassword(MD5Util.MD5EncodeUtf8(passwordOld), user.getId());
+        if (resultCount == 0){
+            return ServerResponse.createByErrorMessage("旧密码错误");
+        }
+        user.setPassword(MD5Util.MD5EncodeUtf8(passwordNew));
+        int updateCount = userMapper.updateByPrimaryKeySelective(user);
+        if (updateCount > 0){
+            return ServerResponse.createBySuccessMessage("密码更新成功");
+        }
+        return ServerResponse.createByErrorMessage("密码更新失败");
+    }
+
+    public ServerResponse<User> updateInformation(User user){
+        //username是不能被更新的
+        //email也要进行校验,修改的email 不能是除本id,其他id存在的email
+        //从非本id 查询出来的email 不能是要修改的email
+        int resultCount = userMapper.checkEmailByUserId(user.getEmail(), user.getId());
+        if (resultCount > 0){
+            return ServerResponse.createByErrorMessage("email已存在,请更换email再尝试更新");
+        }
+
+        User updateUser = new User();
+        updateUser.setId(user.getId());
+        updateUser.setEmail(user.getEmail());
+        updateUser.setPhone(user.getPhone());
+        updateUser.setQuestion(user.getQuestion());
+        updateUser.setAnswer(user.getAnswer());
+
+        int updateCount = userMapper.updateByPrimaryKeySelective(updateUser);
+        if (updateCount > 0){
+            return ServerResponse.createBySuccess("更新个人信息成功",updateUser);
+        }
+        return ServerResponse.createByErrorMessage("更新个人信息失败");
+    }
 
 }

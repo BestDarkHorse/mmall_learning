@@ -27,4 +27,25 @@ public interface IUserService {
      */
     ServerResponse selectQuestion(String username);
 
+    /**
+     * 确定问题答案 是否正确
+     * @param username
+     * @param question
+     * @param answer
+     * @return
+     */
+    ServerResponse<String> checkAnswer(String username,String question,String answer);
+
+    /**
+     * 更新密码
+     * @param username
+     * @param passwordNew
+     * @param forgetToken
+     * @return
+     */
+    ServerResponse<String> forgetResetPassword(String username, String passwordNew, String forgetToken);
+
+    ServerResponse<String> resetPassword(String passwordOld,String passwordNew,User user);
+
+    ServerResponse<User> updateInformation(User user);
 }
