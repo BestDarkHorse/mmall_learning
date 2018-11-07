@@ -66,4 +66,33 @@ public class CategoryManageController {
         }
     }
 
+    @RequestMapping("get_category.do")
+    @ResponseBody
+    public ServerResponse getChildrenParallelCategory(HttpSession session,@RequestParam(value = "categoryId",defaultValue = "0")Integer categoryId){
+        User user = (User)session.getAttribute(Const.CURRENT_USER);
+        if (user == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请重新登录");
+        }
+        if (iUserService.checkAdminRole(user).isSuccess()){
+            //成功说明 是 admin
+            return iCategoryService.getChildrenParallelCategory(categoryId);
+        }else{
+            return ServerResponse.createByErrorMessage("无权操作,需要管理员权限");
+        }
+    }
+
+    public ServerResponse getCategoryAndDeepChildrenCategory(HttpSession session,@RequestParam(value = "categoryId",defaultValue = "0")Integer categoryId){
+        User user = (User)session.getAttribute(Const.CURRENT_USER);
+        if (user == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请重新登录");
+        }
+        if (iUserService.checkAdminRole(user).isSuccess()){
+            //说明是成功的
+            //查询当前节点的id和递归子节点的id
+            return iCategoryService.getChildrenParallelCategory(categoryId);
+        }else{
+            return ServerResponse.createByErrorMessage("无权操作,需要管理员权限");
+        }
+    }
+
 }
