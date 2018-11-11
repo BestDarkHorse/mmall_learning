@@ -1,5 +1,6 @@
 package com.mmall.service;
 
+import com.github.pagehelper.PageInfo;
 import com.mmall.common.ServerResponse;
 import com.mmall.pojo.Product;
 
@@ -19,5 +20,14 @@ public interface IProductService {
      * @return
      */
     ServerResponse<String> setSaleStatus(Integer productId,Integer status);
+
+
+    /**
+     * 获取商品列表数据
+     * @param page
+     * @param pageSizes
+     * @return
+     */
+    ServerResponse<PageInfo> getProductList(Integer page, Integer pageSizes);
 
 }

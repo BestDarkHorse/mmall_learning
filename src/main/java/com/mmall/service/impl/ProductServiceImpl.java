@@ -1,19 +1,33 @@
 package com.mmall.service.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.mmall.common.ResponseCode;
 import com.mmall.common.ServerResponse;
+import com.mmall.dao.CategoryMapper;
 import com.mmall.dao.ProductMapper;
+import com.mmall.pojo.Category;
 import com.mmall.pojo.Product;
 import com.mmall.service.IProductService;
+import com.mmall.util.DateTimeUtil;
+import com.mmall.util.PropertiesUtil;
+import com.mmall.vo.ProductDetailVo;
+import com.mmall.vo.ProductListVo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service("iProductService")
 public class ProductServiceImpl implements IProductService {
 
     @Autowired
     private ProductMapper productMapper;
+
+    @Autowired
+    private CategoryMapper categoryMapper;
 
     public ServerResponse productSaveOrUpdate(Product product){
         if (product != null){
@@ -64,5 +78,85 @@ public class ProductServiceImpl implements IProductService {
         }
 
     }
+
+
+    public ServerResponse<ProductDetailVo> manageProductDetail(Integer productId){
+        if (productId == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+        }
+
+        Product product = productMapper.selectByPrimaryKey(productId);
+        if (product == null) {
+            return ServerResponse.createByErrorMessage("产品已下架或者删除");
+        }
+
+        //将pojo 转化为 vo
+        return null;
+
+    }
+
+    private ProductDetailVo assemblProductDetailVo(Product product){
+        ProductDetailVo productDetailVo = new ProductDetailVo();
+        productDetailVo.setId(product.getId());
+        productDetailVo.setCategoryId(product.getCategoryId());
+        productDetailVo.setName(product.getName());
+        productDetailVo.setSubtitle(product.getSubtitle());
+        productDetailVo.setMainImage(product.getMainImage());
+        productDetailVo.setSubImages(product.getSubImages());
+        productDetailVo.setDetail(product.getDetail());
+        productDetailVo.setPrice(product.getPrice());
+        productDetailVo.setStock(product.getStock());
+
+        //setImageHost
+        productDetailVo.setImageHost(PropertiesUtil.getProperty("ftp.server.http.prefix","http://image.imooc.com/"));
+
+        //setparentCategoryId
+        Category category = categoryMapper.selectByPrimaryKey(product.getCategoryId());
+        if (category == null) {
+            productDetailVo.setParentCategoryId(0);//默认根节点
+        } else {
+            productDetailVo.setParentCategoryId(category.getParentId());
+        }
+        //setCreateTime
+        productDetailVo.setCreateTime(DateTimeUtil.dateToStr(product.getCreateTime()));
+        //setupdateTime
+        productDetailVo.setUpdateTime(DateTimeUtil.dateToStr(product.getUpdateTime()));
+        return productDetailVo;
+    }
+
+    public ServerResponse<PageInfo> getProductList(Integer page,Integer pageSizes){
+        //开启分页
+        PageHelper.startPage(page, pageSizes);
+        //查询sql
+        List<Product> productList = productMapper.selectList();
+
+        //组装返回的数据
+        List<ProductListVo> productListVoList = new ArrayList<>();
+        for (Product item : productList) {
+            ProductListVo productListVo = assembleProductListVo(item);
+            productListVoList.add(productListVo);
+        }
+
+        //分页结尾
+        PageInfo info = new PageInfo<>(productList);
+        info.setList(productListVoList);
+
+        return ServerResponse.createBySuccess(info);
+    }
+
+    private ProductListVo assembleProductListVo(Product product){
+        ProductListVo productListVo = new ProductListVo();
+        productListVo.setId(product.getId());
+        productListVo.setName(product.getName());
+        productListVo.setCategoryId(product.getCategoryId());
+        productListVo.setImageHost(PropertiesUtil.getProperty("ftp.server.http.prefix","http://img.happymmall.com/"));
+        productListVo.setMainImage(product.getMainImage());
+        productListVo.setPrice(product.getPrice());
+        productListVo.setSubtitle(product.getSubtitle());
+        productListVo.setStatus(product.getStatus());
+        return productListVo;
+    }
+
+
 
 }

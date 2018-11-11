@@ -10,9 +10,11 @@ import com.mmall.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpSession;
+import javax.xml.ws.Response;
 
 @Controller
 @RequestMapping("/manage/product")
@@ -54,6 +56,37 @@ public class ProductManageController {
             return ServerResponse.createByErrorMessage("用户无权限,请重新登录");
         }
 
+    }
+
+    @RequestMapping("detail.do")
+    @ResponseBody
+    public  ServerResponse getDetail(HttpSession session,Integer productId){
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if (user == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请重新登录");
+        }
+        if (iUserService.checkAdminRole(user).isSuccess()) {
+            //执行获取详情的逻辑
+            return null;
+        } else {
+            return ServerResponse.createByErrorMessage("用户无权限,请登录管理员");
+        }
+
+    }
+
+    @RequestMapping("list.do")
+    @ResponseBody
+    public ServerResponse getList(HttpSession session, @RequestParam(defaultValue = "1") Integer page,@RequestParam(defaultValue = "10") Integer pageSizes) {
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if (user == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请重新登录");
+        }
+        if (iUserService.checkAdminRole(user).isSuccess()) {
+            //执行获取列表的逻辑
+            return iProductService.getProductList(page, pageSizes);
+        } else {
+            return ServerResponse.createByErrorMessage("用户权限,请联系联系管理员");
+        }
     }
 
 }
