@@ -183,4 +183,19 @@
     FROM  mmall_product
     ORDER BY id ASC
   </select>
+
+    <select id="selectProductByNameAndId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        WHERE mmall_product
+        <where>
+            <if test="productName != null">
+                AND name LIKE concat('%',#{productName},'%')
+            </if>
+            <if test="productId != null">
+                and id = #{productId}
+            </if>
+        </where>
+
+    </select>
 </mapper>
