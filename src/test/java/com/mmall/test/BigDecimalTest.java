@@ -1,6 +1,7 @@
 package com.mmall.test;
 
 import com.google.common.base.Splitter;
+import com.mmall.common.Const;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -32,6 +33,12 @@ public class BigDecimalTest {
         List<String> stringB = Splitter.on(",").splitToList(b);
         System.out.println("testA: " + stringA);
         System.out.println("testB: " + stringB);
+    }
+
+    @Test
+    public void testEnum() {
+        Const.PaymentTypeEnum paymentTypeEnum = Const.PaymentTypeEnum.codeOf(1);
+        System.out.println(paymentTypeEnum.getCode() + " : " + paymentTypeEnum.getValue());
     }
 
 }

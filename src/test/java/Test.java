@@ -1,3 +1,5 @@
+import com.alibaba.fastjson.JSON;
+import com.mmall.common.ServerResponse;
 import com.mmall.util.BigDecimalUtil;
 import com.mmall.util.DateTimeUtil;
 
@@ -22,6 +24,17 @@ public class Test {
         System.out.println("Integer 除法"+a/b);
         BigDecimal div = BigDecimalUtil.div(a.doubleValue(), b.doubleValue());
         System.out.println("BigDecimal 除法" + div);
+    }
+
+    @org.junit.Test
+    public void testServerResponse() {
+//        ServerResponse<String> abc = ServerResponse.createByErrorMessage("这就是我的地盘");
+//        System.out.println(JSON.toJSON(abc));
+
+        ServerResponse<String> suc = ServerResponse.createBySuccess();
+        ServerResponse<String> byError = ServerResponse.createByError();
+
+        System.out.println(JSON.toJSON(byError));
     }
 
 }
