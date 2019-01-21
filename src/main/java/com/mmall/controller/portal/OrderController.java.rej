@@ -1,9 +1,0 @@
-diff a/src/main/java/com/mmall/controller/portal/OrderController.java b/src/main/java/com/mmall/controller/portal/OrderController.java	(rejected hunks)
-@@ -138,6 +138,7 @@
-         }
- 
-         //todo 驗證各種數據
-+        //todo 继续验证数据
- 
-         ServerResponse serverResponse = iOrderService.aliCallback(params);
-         if (serverResponse.isSuccess()) {
