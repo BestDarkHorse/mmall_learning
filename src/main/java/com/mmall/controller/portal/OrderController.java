@@ -138,7 +138,6 @@ public class OrderController {
         }
 
         //todo 驗證各種數據
-        //todo 验证各种数据
 
         ServerResponse serverResponse = iOrderService.aliCallback(params);
         if (serverResponse.isSuccess()) {
