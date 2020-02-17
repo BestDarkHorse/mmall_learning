@@ -6,4 +6,7 @@ package com.mmall.vo3;
  * @date 2020/2/17
  */
 public class TestVO3 {
+
+    private String name;
+
 }
