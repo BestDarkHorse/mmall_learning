@@ -12,7 +12,6 @@ import com.mmall.pojo.Product;
 import com.mmall.service.ICartService;
 import com.mmall.util.BigDecimalUtil;
 import com.mmall.util.PropertiesUtil;
-import com.mmall.vo.CartProductVo;
 import com.mmall.vo.CartVo;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
