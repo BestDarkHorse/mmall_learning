@@ -21,6 +21,7 @@ public class CartProductVo {
     private Integer productStock;
     private Integer productChecked;//此商品是否被勾选
 
-    private String  limitQuantity;
+    private String limitQuantity;
+    private String test;
 
 }
