@@ -8,4 +8,5 @@ package com.mmall.vo3;
 public class TestVO3 {
     private Integer ages;
     private String text;
+    private String test2;
 }
