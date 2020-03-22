@@ -1,4 +1,4 @@
-package com.mmall.Vo3;
+package com.mmall.vo3;
 
 /**
  * @author dongkui.sun
